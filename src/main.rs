@@ -71,7 +71,7 @@ fn main() {
     println!("255");
 
     for j in 0..image_height {
-        eprint!("\rScanlines remaining: {}", image_height - j);
+        eprint!("\rScanlines remaining: {}   ", image_height - j);
         for i in 0..image_width {
             let pixel_center =
                 pixel00_loc + (i as f64 * pixel_delta_u) + (j as f64 * pixel_delta_v);
@@ -83,5 +83,5 @@ fn main() {
             println!("{pixel_color}");
         }
     }
-    eprintln!("\rDone.                   ");
+    eprintln!("\rDone.                      ");
 }
