@@ -4,6 +4,7 @@ use crate::{
     vec3::{Point3, Vec3},
 };
 
+mod angles;
 mod color;
 mod hittable;
 mod hittable_list;
