@@ -1,6 +1,12 @@
+use std::rc::Rc;
+
+use hittable::Hittable;
+use hittable_list::HittableList;
+
 use crate::{
     color::Color,
     ray::Ray,
+    sphere::Sphere,
     vec3::{Point3, Vec3},
 };
 
@@ -12,27 +18,15 @@ mod ray;
 mod sphere;
 mod vec3;
 
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
-    let oc = r.origin() - center;
-    let a = r.direction().length_squared();
-    let half_b = oc.dot(&r.direction());
-    let c = oc.length_squared() - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-
-    if discriminant < 0. {
-        -1.0
-    } else {
-        (-half_b - discriminant.sqrt()) / a
-    }
-}
-
-fn ray_color(r: &Ray) -> Color {
-    let t = hit_sphere(&Point3::new_with_data(0., 0., -1.), 0.5, r);
-    if t > 0.0 {
-        let n = (r.at(t) - Vec3::new_with_data(0., 0., -1.)).unit_vector();
-        return Color::from(0.5 * Vec3::new_with_data(n.x() + 1., n.y() + 1., n.z() + 1.));
+fn ray_color(r: &Ray, world: &HittableList) -> Color {
+    // Check if we have a collision first.
+    // tmin 0 as we don't want to look behind the viewport, infinity max as we look infinitely far
+    // in the distance.
+    if let Some(hit_record) = world.hit(r, 0., f64::INFINITY) {
+        return Color::from(0.5 * (hit_record.normal + Vec3::new_with_data(1., 1., 1.)));
     }
 
+    // Background
     let unit_direction = r.direction().unit_vector();
     let a = 0.5 * (unit_direction.y() + 1.0);
 
@@ -48,6 +42,17 @@ fn main() {
     // Calculate image height given the width and aspect ratio.
     // Ensure the height is at least 1
     let image_height = ((image_width as f64 / aspect_ratio).max(1.)) as usize;
+
+    // World
+    let mut world = HittableList::new();
+    world.add(Rc::new(Sphere::new(
+        Point3::new_with_data(0., 0., -1.),
+        0.5,
+    )));
+    world.add(Rc::new(Sphere::new(
+        Point3::new_with_data(0., -100.5, -1.),
+        100.,
+    )));
 
     // Camera
     let focal_length = 1.0;
@@ -82,7 +87,7 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let r = Ray::new(camera_center, ray_direction);
 
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
 
             println!("{pixel_color}");
         }
