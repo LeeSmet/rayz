@@ -27,12 +27,12 @@ impl Vec3 {
 
     /// Return the y component of this `Vec3`.
     pub fn y(&self) -> f64 {
-        self.0
+        self.1
     }
 
     /// Return the z component of this `Vec3`.
     pub fn z(&self) -> f64 {
-        self.0
+        self.2
     }
 
     /// Return the length of this `Vec3` if it is interpreted as a vector.
