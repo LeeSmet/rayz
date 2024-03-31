@@ -8,19 +8,25 @@ mod color;
 mod ray;
 mod vec3;
 
-fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> bool {
+fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     let oc = r.origin() - center;
     let a = r.direction().dot(&r.direction());
     let b = 2.0 * oc.dot(&r.direction());
     let c = oc.dot(&oc) - radius * radius;
     let discriminant = b * b - 4. * a * c;
 
-    discriminant >= 0.
+    if discriminant < 0. {
+        -1.0
+    } else {
+        (-b - discriminant.sqrt()) / (2.0 * a)
+    }
 }
 
 fn ray_color(r: &Ray) -> Color {
-    if hit_sphere(&Point3::new_with_data(0., 0., -1.), 0.5, r) {
-        return Color::from(Vec3::new_with_data(1., 0., 0.));
+    let t = hit_sphere(&Point3::new_with_data(0., 0., -1.), 0.5, r);
+    if t > 0.0 {
+        let n = (r.at(t) - Vec3::new_with_data(0., 0., -1.)).unit_vector();
+        return Color::from(0.5 * Vec3::new_with_data(n.x() + 1., n.y() + 1., n.z() + 1.));
     }
 
     let unit_direction = r.direction().unit_vector();
