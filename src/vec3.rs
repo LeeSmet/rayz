@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use core::fmt;
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3(f64, f64, f64);
@@ -196,6 +196,22 @@ impl MulAssign<f64> for Vec3 {
 impl DivAssign<f64> for Vec3 {
     fn div_assign(&mut self, rhs: f64) {
         *self *= 1. / rhs;
+    }
+}
+
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Self::Output {
+        Vec3(-self.0, -self.1, -self.2)
+    }
+}
+
+impl Neg for &Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Self::Output {
+        Vec3(-self.0, -self.1, -self.2)
     }
 }
 
