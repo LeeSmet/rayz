@@ -1,6 +1,7 @@
 use crate::{color::Color, vec3::Vec3};
 
 mod color;
+mod ray;
 mod vec3;
 
 fn main() {
