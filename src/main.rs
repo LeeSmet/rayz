@@ -1,3 +1,6 @@
+use crate::{color::Color, vec3::Vec3};
+
+mod color;
 mod vec3;
 
 fn main() {
@@ -11,17 +14,13 @@ fn main() {
     for j in 0..image_height {
         eprint!("\rScanlines remaining: {}", image_height - j);
         for i in 0..image_width {
-            let r = i as f64 / (image_width - 1) as f64;
-            let g = j as f64 / (image_height - 1) as f64;
-            let b = 0.;
+            let pixel_color = Color::from(Vec3::new_with_data(
+                i as f64 / (image_width - 1) as f64,
+                j as f64 / (image_height - 1) as f64,
+                0.,
+            ));
 
-            const BASE: f64 = 255.999;
-
-            let ir = (BASE * r) as u8;
-            let ig = (BASE * g) as u8;
-            let ib = (BASE * b) as u8;
-
-            println!("{ir} {ig} {ib}");
+            println!("{pixel_color}");
         }
     }
     eprintln!("\rDone.                   ");
