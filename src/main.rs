@@ -2,6 +2,7 @@ use std::rc::Rc;
 
 use hittable::Hittable;
 use hittable_list::HittableList;
+use interval::Interval;
 
 use crate::{
     color::Color,
@@ -23,7 +24,7 @@ fn ray_color(r: &Ray, world: &HittableList) -> Color {
     // Check if we have a collision first.
     // tmin 0 as we don't want to look behind the viewport, infinity max as we look infinitely far
     // in the distance.
-    if let Some(hit_record) = world.hit(r, 0., f64::INFINITY) {
+    if let Some(hit_record) = world.hit(r, Interval::new(0., f64::INFINITY)) {
         return Color::from(0.5 * (hit_record.normal + Vec3::new_with_data(1., 1., 1.)));
     }
 
