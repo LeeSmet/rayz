@@ -25,4 +25,12 @@ impl Interval {
     pub fn surrounds(&self, x: f64) -> bool {
         self.min < x && self.max > x
     }
+
+    pub fn min(&self) -> f64 {
+        self.min
+    }
+
+    pub fn max(&self) -> f64 {
+        self.max
+    }
 }
