@@ -26,6 +26,17 @@ impl Interval {
         self.min < x && self.max > x
     }
 
+    /// Clamp the value in the interval
+    pub fn clamp(&self, x: f64) -> f64 {
+        if x < self.min {
+            self.min
+        } else if x > self.max {
+            self.max
+        } else {
+            x
+        }
+    }
+
     pub fn min(&self) -> f64 {
         self.min
     }
