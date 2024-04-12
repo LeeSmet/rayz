@@ -43,6 +43,11 @@ impl Vec3 {
         }
     }
 
+    /// Generate a random unit vector.
+    pub fn random_unit_vector() -> Self {
+        Self::unit_vector(&Self::random_in_unit_sphere())
+    }
+
     /// Create a new `Vec3` with  the given values.
     pub fn new_with_data(x: f64, y: f64, z: f64) -> Self {
         Self(x, y, z)
