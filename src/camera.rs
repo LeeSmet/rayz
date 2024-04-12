@@ -92,7 +92,8 @@ impl Camera {
         // tmin 0 as we don't want to look behind the viewport, infinity max as we look infinitely far
         // in the distance.
         if let Some(hit_record) = world.hit(r, Interval::new(0., f64::INFINITY)) {
-            return 0.5 * (hit_record.normal + Vec3::new_with_data(1., 1., 1.));
+            let direction = Vec3::random_on_hemisphere(&hit_record.normal);
+            return 0.5 * Self::ray_color(&Ray::new(hit_record.p, direction), world);
         }
 
         // Background
