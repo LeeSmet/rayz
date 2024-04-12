@@ -3,6 +3,8 @@
 use core::fmt;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 
+use rand::distributions::{Distribution, Uniform};
+
 #[derive(Debug, Copy, Clone)]
 pub struct Vec3(f64, f64, f64);
 
@@ -18,6 +20,17 @@ impl Vec3 {
     /// Generate a new Vec3 with random values in the range [0,1[.
     pub fn random() -> Self {
         Self(rand::random(), rand::random(), rand::random())
+    }
+
+    /// Generate a new Vec3 where each field is random within the given bounds
+    pub fn random_range(min: f64, max: f64) -> Self {
+        let mut rng = rand::thread_rng();
+        let dis = Uniform::from(min..max);
+        Self(
+            dis.sample(&mut rng),
+            dis.sample(&mut rng),
+            dis.sample(&mut rng),
+        )
     }
 
     /// Create a new `Vec3` with  the given values.
