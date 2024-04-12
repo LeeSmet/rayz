@@ -33,6 +33,16 @@ impl Vec3 {
         )
     }
 
+    /// Generate a random Vec3 which is inside the unit sphere.
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random_range(-1., 1.);
+            if p.length_squared() <= 1. {
+                return p;
+            }
+        }
+    }
+
     /// Create a new `Vec3` with  the given values.
     pub fn new_with_data(x: f64, y: f64, z: f64) -> Self {
         Self(x, y, z)
