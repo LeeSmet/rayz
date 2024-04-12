@@ -26,11 +26,19 @@ pub struct Camera {
     pixel_delta_v: Vec3,
     /// Amount of samples to generate per pixel (anti aliasing)
     samples_per_pixel: usize,
+    /// Maximum amount of times we bounce a ray
+    max_depth: usize,
 }
 
 impl Camera {
-    /// Create a new `Camera` with the proivded aspect ratio and output image width.
-    pub fn new(aspect_ratio: f64, image_width: usize, samples_per_pixel: usize) -> Self {
+    /// Create a new `Camera` with the proivded aspect ratio and output image width, the maximum
+    /// amount of samples per pixel, and the maximum amount of times a single ray can bounce.
+    pub fn new(
+        aspect_ratio: f64,
+        image_width: usize,
+        samples_per_pixel: usize,
+        max_depth: usize,
+    ) -> Self {
         // Calculate image height given the width and aspect ratio.
         // Ensure the height is at least 1
         let image_height = ((image_width as f64 / aspect_ratio).max(1.)) as usize;
@@ -62,6 +70,7 @@ impl Camera {
             pixel_delta_u,
             pixel_delta_v,
             samples_per_pixel,
+            max_depth,
         }
     }
 
@@ -77,7 +86,7 @@ impl Camera {
                 let mut color = Vec3::new();
                 for _ in 0..self.samples_per_pixel {
                     let ray = self.get_ray(i, j);
-                    color += &Self::ray_color(&ray, &world);
+                    color += &Self::ray_color(&ray, self.max_depth, &world);
                 }
                 let pixel_color = SampledColor::new(color, self.samples_per_pixel);
 
@@ -87,13 +96,17 @@ impl Camera {
         eprintln!("\rDone.                      ");
     }
 
-    fn ray_color(r: &Ray, world: &HittableList) -> Vec3 {
+    fn ray_color(r: &Ray, depth: usize, world: &HittableList) -> Vec3 {
+        // Ray bounce limit, no more light
+        if depth == 0 {
+            return Vec3::new();
+        }
         // Check if we have a collision first.
         // tmin 0 as we don't want to look behind the viewport, infinity max as we look infinitely far
         // in the distance.
         if let Some(hit_record) = world.hit(r, Interval::new(0., f64::INFINITY)) {
             let direction = Vec3::random_on_hemisphere(&hit_record.normal);
-            return 0.5 * Self::ray_color(&Ray::new(hit_record.p, direction), world);
+            return 0.5 * Self::ray_color(&Ray::new(hit_record.p, direction), depth - 1, world);
         }
 
         // Background
