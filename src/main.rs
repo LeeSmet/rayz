@@ -19,7 +19,7 @@ fn main() {
     let aspect_ratio = 16.0 / 9.0;
     let image_width = 400;
 
-    let camera = Camera::new(aspect_ratio, image_width);
+    let camera = Camera::new(aspect_ratio, image_width, camera::ANTI_ALIASING_STRONG);
 
     // World
     let mut world = HittableList::new();

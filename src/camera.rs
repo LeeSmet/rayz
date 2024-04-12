@@ -1,11 +1,14 @@
 use crate::{
-    color::Color,
+    color::SampledColor,
     hittable::Hittable,
     hittable_list::HittableList,
     interval::Interval,
     ray::Ray,
     vec3::{Point3, Vec3},
 };
+
+/// Strong 16x anti aliasing.
+pub const ANTI_ALIASING_STRONG: usize = 16;
 
 pub struct Camera {
     _aspect_ratio: f64,
@@ -21,11 +24,13 @@ pub struct Camera {
     pixel_delta_u: Vec3,
     /// Offset to pixel below
     pixel_delta_v: Vec3,
+    /// Amount of samples to generate per pixel (anti aliasing)
+    samples_per_pixel: usize,
 }
 
 impl Camera {
     /// Create a new `Camera` with the proivded aspect ratio and output image width.
-    pub fn new(aspect_ratio: f64, image_width: usize) -> Self {
+    pub fn new(aspect_ratio: f64, image_width: usize, samples_per_pixel: usize) -> Self {
         // Calculate image height given the width and aspect ratio.
         // Ensure the height is at least 1
         let image_height = ((image_width as f64 / aspect_ratio).max(1.)) as usize;
@@ -56,6 +61,7 @@ impl Camera {
             pixel00_loc,
             pixel_delta_u,
             pixel_delta_v,
+            samples_per_pixel,
         }
     }
 
@@ -68,13 +74,12 @@ impl Camera {
         for j in 0..self.image_height {
             eprint!("\rScanlines remaining: {}   ", self.image_height - j);
             for i in 0..self.image_width {
-                let pixel_center = self.pixel00_loc
-                    + (i as f64 * self.pixel_delta_u)
-                    + (j as f64 * self.pixel_delta_v);
-                let ray_direction = pixel_center - self.center;
-                let r = Ray::new(self.center, ray_direction);
-
-                let pixel_color = Self::ray_color(&r, &world);
+                let mut color = Vec3::new();
+                for _ in 0..self.samples_per_pixel {
+                    let ray = self.get_ray(i, j);
+                    color += &Self::ray_color(&ray, &world);
+                }
+                let pixel_color = SampledColor::new(color, self.samples_per_pixel);
 
                 println!("{pixel_color}");
             }
@@ -82,20 +87,37 @@ impl Camera {
         eprintln!("\rDone.                      ");
     }
 
-    fn ray_color(r: &Ray, world: &HittableList) -> Color {
+    fn ray_color(r: &Ray, world: &HittableList) -> Vec3 {
         // Check if we have a collision first.
         // tmin 0 as we don't want to look behind the viewport, infinity max as we look infinitely far
         // in the distance.
         if let Some(hit_record) = world.hit(r, Interval::new(0., f64::INFINITY)) {
-            return Color::from(0.5 * (hit_record.normal + Vec3::new_with_data(1., 1., 1.)));
+            return 0.5 * (hit_record.normal + Vec3::new_with_data(1., 1., 1.));
         }
 
         // Background
         let unit_direction = r.direction().unit_vector();
         let a = 0.5 * (unit_direction.y() + 1.0);
 
-        Color::from(
-            (1.0 - a) * Vec3::new_with_data(1., 1., 1.) + a * Vec3::new_with_data(0.5, 0.7, 1.0),
-        )
+        (1.0 - a) * Vec3::new_with_data(1., 1., 1.) + a * Vec3::new_with_data(0.5, 0.7, 1.0)
+    }
+
+    fn get_ray(&self, i: usize, j: usize) -> Ray {
+        let pixel_center =
+            self.pixel00_loc + (i as f64 * self.pixel_delta_u) + (j as f64 * self.pixel_delta_v);
+        let pixel_sample = pixel_center + self.pixel_sample_square();
+
+        let ray_origin = self.center;
+        let ray_direction = pixel_sample - ray_origin;
+
+        Ray::new(ray_origin, ray_direction)
+    }
+
+    /// Return a random point in the square surrounding the origin pixel.
+    fn pixel_sample_square(&self) -> Vec3 {
+        let px = -0.5 + rand::random::<f64>();
+        let py = -0.5 + rand::random::<f64>();
+
+        (px * self.pixel_delta_u) + (py * self.pixel_delta_v)
     }
 }
