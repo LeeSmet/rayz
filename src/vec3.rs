@@ -15,6 +15,11 @@ impl Vec3 {
         Self(0., 0., 0.)
     }
 
+    /// Generate a new Vec3 with random values in the range [0,1[.
+    pub fn random() -> Self {
+        Self(rand::random(), rand::random(), rand::random())
+    }
+
     /// Create a new `Vec3` with  the given values.
     pub fn new_with_data(x: f64, y: f64, z: f64) -> Self {
         Self(x, y, z)
