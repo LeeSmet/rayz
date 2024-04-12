@@ -48,6 +48,16 @@ impl Vec3 {
         Self::unit_vector(&Self::random_in_unit_sphere())
     }
 
+    /// Generate a radndom unit vector in the same hemisphere as the given normal.
+    pub fn random_on_hemisphere(normal: &Self) -> Self {
+        let on_unit_sphere = Self::random_unit_vector();
+        if on_unit_sphere.dot(normal) > 0.0 {
+            on_unit_sphere
+        } else {
+            -on_unit_sphere
+        }
+    }
+
     /// Create a new `Vec3` with  the given values.
     pub fn new_with_data(x: f64, y: f64, z: f64) -> Self {
         Self(x, y, z)
