@@ -42,9 +42,9 @@ impl Display for SampledColor {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let scale = 1.0 / self.samples as f64;
 
-        let r = self.color.x() * scale;
-        let g = self.color.y() * scale;
-        let b = self.color.z() * scale;
+        let r = linear_to_gamma(self.color.x() * scale);
+        let g = linear_to_gamma(self.color.y() * scale);
+        let b = linear_to_gamma(self.color.z() * scale);
 
         let interval_intensity = Interval::new(0.000, 0.999);
         const COLOR_BASE: f64 = 256.;
@@ -55,4 +55,8 @@ impl Display for SampledColor {
             (interval_intensity.clamp(b) * COLOR_BASE) as u8,
         ))
     }
+}
+
+fn linear_to_gamma(linear_component: f64) -> f64 {
+    linear_component.sqrt()
 }
